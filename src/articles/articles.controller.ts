@@ -4,6 +4,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { ArticleResponse, DeleteArticleResponse } from './interfaces/article.interface';
 import { Request } from 'express';
+import { CreateCommentDto } from './dto/comment.dto';
+import { CommentResponse, CommentsResponse } from './interfaces/comment.interface';
+import { GetUser } from './common/decorators/get-user.decorator';
 
 interface JwtPayload {
   sub: number;
@@ -59,4 +62,6 @@ export class ArticlesController {
     }
     return this.articlesService.deleteArticle(slug, req.user.sub);
   }
+
+
 }
