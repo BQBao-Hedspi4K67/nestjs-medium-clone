@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
-import { ArticleResponse, DeleteArticleResponse } from './interfaces/article.interface';
+import { ListArticlesDto } from './dto/list-articles.dto';
+import { ArticleResponse, DeleteArticleResponse, ListArticlesResponse } from './interfaces/article.interface';
 import { Request } from 'express';
 import { CreateCommentDto } from './dto/comment.dto';
 import { CommentResponse, CommentsResponse } from './interfaces/comment.interface';
@@ -26,7 +27,7 @@ export class ArticlesController {
   async create(
     @Body('article') createArticleDto: CreateArticleDto,
     @Req() req: RequestWithUser,
-  ): Promise<ArticleResponse> {
+  ): Promise<any> {
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
     }
@@ -34,7 +35,7 @@ export class ArticlesController {
   }
 
   @Get(':slug')
-  async get(@Param('slug') slug: string): Promise<ArticleResponse> {
+  async get(@Param('slug') slug: string): Promise<any> {
     return this.articlesService.getArticle(slug);
   }
 
@@ -44,7 +45,7 @@ export class ArticlesController {
     @Param('slug') slug: string,
     @Body('article') updateArticleDto: UpdateArticleDto,
     @Req() req: RequestWithUser,
-  ): Promise<ArticleResponse> {
+  ): Promise<any> {
     if (!req.user) {
       throw new UnauthorizedException('User not authenticated');
     }
@@ -63,5 +64,8 @@ export class ArticlesController {
     return this.articlesService.deleteArticle(slug, req.user.sub);
   }
 
-
+  @Get()
+  async list(@Query() query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
+    return this.articlesService.listArticles(query);
+  }
 }

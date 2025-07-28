@@ -2,7 +2,8 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { CreateCommentDto } from './dto/comment.dto';
-import { ArticleResponse, DeleteArticleResponse } from './interfaces/article.interface';
+import { ListArticlesDto } from './dto/list-articles.dto';
+import { ArticleResponse, DeleteArticleResponse, ListArticlesResponse } from './interfaces/article.interface';
 import { CommentResponse, CommentsResponse } from './interfaces/comment.interface';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class ArticlesService {
       .replace(/\s+/g, '-');
   }
 
-  async createArticle(userId: number, dto: CreateArticleDto): Promise<ArticleResponse> {
+  async createArticle(userId: number, dto: CreateArticleDto): Promise<any> {
     const slug = this.generateSlug(dto.title);
 
     const article = await this.prisma.article.create({
@@ -39,7 +40,7 @@ export class ArticlesService {
     return { article };
   }
 
-  async getArticle(slug: string): Promise<ArticleResponse> {
+  async getArticle(slug: string): Promise<any> {
     const article = await this.prisma.article.findUnique({
       where: { slug },
       include: {
@@ -60,7 +61,7 @@ export class ArticlesService {
     return { article };
   }
 
-  async updateArticle(slug: string, userId: number, dto: UpdateArticleDto): Promise<ArticleResponse> {
+  async updateArticle(slug: string, userId: number, dto: UpdateArticleDto): Promise<any> {
     const article = await this.prisma.article.findUnique({
       where: { slug },
     });
@@ -212,5 +213,52 @@ export class ArticlesService {
     });
 
     return { message: 'Comment deleted successfully' };
+  }
+
+  async listArticles(query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
+    const where: any = {};
+
+    if (query.tag) {
+      where.tagList = {
+        has: query.tag
+      };
+    }
+
+    if (query.author) {
+      where.author = {
+        username: query.author
+      };
+    }
+
+    // Note: We'll implement favorited filter in a future update when we add favorites functionality
+
+    const [articles, total] = await Promise.all([
+      this.prisma.article.findMany({
+        where,
+        include: {
+          author: {
+            select: {
+              username: true,
+              bio: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: {
+          id: 'desc'
+        },
+        skip: query.offset,
+        take: query.limit,
+      }),
+      this.prisma.article.count({ where })
+    ]);
+
+    return {
+      articles: articles.map((article: any) => {
+        const { authorId, ...articleData } = article;
+        return articleData;
+      }),
+      articlesCount: total
+    };
   }
 }
