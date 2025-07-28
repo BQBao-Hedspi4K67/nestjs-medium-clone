@@ -194,7 +194,7 @@ export class ArticlesService {
     slug: string,
     commentId: number,
     userId: number,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
     });
@@ -210,5 +210,7 @@ export class ArticlesService {
     await this.prisma.comment.delete({
       where: { id: commentId },
     });
+
+    return { message: 'Comment deleted successfully' };
   }
 }

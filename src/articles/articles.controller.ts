@@ -63,30 +63,5 @@ export class ArticlesController {
     return this.articlesService.deleteArticle(slug, req.user.sub);
   }
 
-  @Post(':slug/comments')
-  @UseGuards(AuthGuard('jwt'))
-  async createComment(
-    @Param('slug') slug: string,
-    @Body('comment') createCommentDto: CreateCommentDto,
-    @GetUser() user: JwtPayload,
-  ): Promise<CommentResponse> {
-    return this.articlesService.createComment(slug, user.sub, createCommentDto);
-  }
 
-  @Get(':slug/comments')
-  async getComments(
-    @Param('slug') slug: string,
-  ): Promise<CommentsResponse> {
-    return this.articlesService.getComments(slug);
-  }
-
-  @Delete(':slug/comments/:id')
-  @UseGuards(AuthGuard('jwt'))
-  async deleteComment(
-    @Param('slug') slug: string,
-    @Param('id') id: string,
-    @GetUser() user: JwtPayload,
-  ): Promise<void> {
-    return this.articlesService.deleteComment(slug, +id, user.sub);
-  }
 }
