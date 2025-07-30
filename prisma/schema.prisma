@@ -16,6 +16,10 @@ model User {
   image    String?
   articles Article[]
   comments Comment[]
+  
+  // Following relationships
+  following Follow[] @relation("UserFollowing")
+  followers Follow[] @relation("UserFollowers")
 }
 
 model Article {
@@ -41,4 +45,16 @@ model Comment {
   authorId  Int
   createdAt DateTime @default(now())       
   updatedAt DateTime @updatedAt
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int
+  followingId Int
+  createdAt   DateTime @default(now())
+  
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId])
 }
