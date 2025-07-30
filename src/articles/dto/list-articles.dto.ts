@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { PAGINATION_CONSTANTS } from '../../common/constants/pagination.constants';
 
 export class ListArticlesDto {
   @IsOptional()
@@ -17,10 +18,10 @@ export class ListArticlesDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  limit?: number = 20;
+  limit?: number = PAGINATION_CONSTANTS.DEFAULT_LIMIT;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  offset?: number = 0;
+  offset?: number = PAGINATION_CONSTANTS.DEFAULT_OFFSET;
 }
