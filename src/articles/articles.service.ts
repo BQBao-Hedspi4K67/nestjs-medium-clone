@@ -261,4 +261,55 @@ export class ArticlesService {
       articlesCount: total
     };
   }
+
+  async getFeedArticles(userId: number, query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
+    // Get list of users that current user is following using raw query
+    const following = await this.prisma.$queryRaw`
+      SELECT "followingId" 
+      FROM "Follow" 
+      WHERE "followerId" = ${userId}
+    `;
+
+    const followingIds = (following as any[]).map(f => f.followingId);
+
+    if (followingIds.length === 0) {
+      // If user is not following anyone, return empty feed
+      return { articles: [], articlesCount: 0 };
+    }
+
+    const where: any = {
+      authorId: {
+        in: followingIds
+      }
+    };
+
+    const [articles, total] = await Promise.all([
+      this.prisma.article.findMany({
+        where,
+        include: {
+          author: {
+            select: {
+              username: true,
+              bio: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: query.offset,
+        take: query.limit,
+      }),
+      this.prisma.article.count({ where })
+    ]);
+
+    return {
+      articles: articles.map((article: any) => {
+        const { authorId, ...articleData } = article;
+        return articleData;
+      }),
+      articlesCount: total
+    };
+  }
 }

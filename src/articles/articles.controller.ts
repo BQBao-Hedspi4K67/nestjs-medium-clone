@@ -34,6 +34,20 @@ export class ArticlesController {
     return this.articlesService.createArticle(req.user.sub, createArticleDto);
   }
 
+  @Get('feed')
+  @UseGuards(AuthGuard('jwt'))
+  async getFeed(
+    @Query() query: ListArticlesDto,
+    @GetUser() user: JwtPayload,
+  ): Promise<{ articles: any[], articlesCount: number }> {
+    return this.articlesService.getFeedArticles(user.sub, query);
+  }
+
+  @Get()
+  async list(@Query() query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
+    return this.articlesService.listArticles(query);
+  }
+
   @Get(':slug')
   async get(@Param('slug') slug: string): Promise<any> {
     return this.articlesService.getArticle(slug);
@@ -62,10 +76,5 @@ export class ArticlesController {
       throw new UnauthorizedException('User not authenticated');
     }
     return this.articlesService.deleteArticle(slug, req.user.sub);
-  }
-
-  @Get()
-  async list(@Query() query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
-    return this.articlesService.listArticles(query);
   }
 }
