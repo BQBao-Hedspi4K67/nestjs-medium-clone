@@ -310,4 +310,96 @@ export class ArticlesService {
       articlesCount: total
     };
   }
+
+  async favoriteArticle(slug: string, userId: number): Promise<ArticleResponse> {
+    const article = await this.prisma.article.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            username: true,
+            bio: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    await this.prisma.$executeRaw`
+      INSERT INTO "Favorite" ("userId", "articleId", "createdAt")
+      VALUES (${userId}, ${article.id}, NOW())
+      ON CONFLICT ("userId", "articleId") DO NOTHING
+    `;
+
+    const favoritesCount = await this.prisma.$queryRaw`
+      SELECT COUNT(*) as count FROM "Favorite" WHERE "articleId" = ${article.id}
+    `;
+
+    const count = Number((favoritesCount as any)[0].count);
+    const { authorId, ...articleData } = article;
+    
+    return {
+      article: {
+        ...articleData,
+        favorited: true,
+        favoritesCount: count,
+      } as any,
+    };
+  }
+
+  async unfavoriteArticle(slug: string, userId: number): Promise<ArticleResponse> {
+    const article = await this.prisma.article.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            username: true,
+            bio: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    await this.prisma.$executeRaw`
+      DELETE FROM "Favorite" 
+      WHERE "userId" = ${userId} AND "articleId" = ${article.id}
+    `;
+
+    const favoritesCount = await this.prisma.$queryRaw`
+      SELECT COUNT(*) as count FROM "Favorite" WHERE "articleId" = ${article.id}
+    `;
+
+    const count = Number((favoritesCount as any)[0].count);
+    const { authorId, ...articleData } = article;
+    
+    return {
+      article: {
+        ...articleData,
+        favorited: false,
+        favoritesCount: count,
+      } as any,
+    };
+  }
+
+  async getTags(): Promise<{ tags: string[] }> {
+    const articles = await this.prisma.article.findMany({
+      select: {
+        tagList: true,
+      },
+    });
+
+    const allTags = articles.flatMap(article => article.tagList);
+    const uniqueTags = [...new Set(allTags)].sort();
+
+    return { tags: uniqueTags };
+  }
 }
