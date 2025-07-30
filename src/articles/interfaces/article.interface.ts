@@ -11,11 +11,18 @@ export interface Article {
   description: string;
   body: string;
   tagList: string[];
+  createdAt: Date;
+  updatedAt: Date;
   author: Author;
 }
 
 export interface ArticleResponse {
   article: Article;
+}
+
+export interface ListArticlesResponse {
+  articles: Article[];
+  articlesCount: number;
 }
 
 export interface DeleteArticleResponse {
