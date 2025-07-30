@@ -13,22 +13,22 @@ export class OptionalJwtGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
     
-    if (authHeader) {
-      try {
-        let token: string;
-        
-        if (authHeader.startsWith('Token ')) {
-          token = authHeader.substring(6);
-        } else {
-          return true;
-        }
+    if (!authHeader) return true;
 
-        const jwtSecret = this.configService.get('JWT_SECRET');
-        const decoded = this.jwtService.verify(token, { secret: jwtSecret });
-        request.user = decoded;
-      } catch (error) {
-        
+    try {
+      let token: string;
+      
+      if (authHeader.startsWith('Token ')) {
+        token = authHeader.substring(6);
+      } else {
+        return true;
       }
+
+      const jwtSecret = this.configService.get('JWT_SECRET');
+      const decoded = this.jwtService.verify(token, { secret: jwtSecret });
+      request.user = decoded;
+    } catch (error) {
+      request.user = null;
     }
     
     return true;

@@ -263,7 +263,6 @@ export class ArticlesService {
   }
 
   async getFeedArticles(userId: number, query: ListArticlesDto): Promise<{ articles: any[], articlesCount: number }> {
-    // Get list of users that current user is following using raw query
     const following = await this.prisma.$queryRaw`
       SELECT "followingId" 
       FROM "Follow" 
@@ -273,7 +272,6 @@ export class ArticlesService {
     const followingIds = (following as any[]).map(f => f.followingId);
 
     if (followingIds.length === 0) {
-      // If user is not following anyone, return empty feed
       return { articles: [], articlesCount: 0 };
     }
 
