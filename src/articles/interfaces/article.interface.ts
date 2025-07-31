@@ -14,6 +14,8 @@ export interface Article {
   createdAt: Date;
   updatedAt: Date;
   author: Author;
+  favorited?: boolean;
+  favoritesCount?: number;
 }
 
 export interface ArticleResponse {

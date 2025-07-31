@@ -77,4 +77,22 @@ export class ArticlesController {
     }
     return this.articlesService.deleteArticle(slug, req.user.sub);
   }
+
+  @Post(':slug/favorite')
+  @UseGuards(AuthGuard('jwt'))
+  async favorite(
+    @Param('slug') slug: string,
+    @GetUser() user: JwtPayload,
+  ): Promise<ArticleResponse> {
+    return this.articlesService.favoriteArticle(slug, user.sub);
+  }
+
+  @Delete(':slug/favorite')
+  @UseGuards(AuthGuard('jwt'))
+  async unfavorite(
+    @Param('slug') slug: string,
+    @GetUser() user: JwtPayload,
+  ): Promise<ArticleResponse> {
+    return this.articlesService.unfavoriteArticle(slug, user.sub);
+  }
 }

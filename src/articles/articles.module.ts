@@ -7,6 +7,7 @@ import { CommentsController } from './comments.controller';
 @Module({
   imports: [PrismaModule],
   controllers: [ArticlesController, CommentsController],
-  providers: [ArticlesService]
+  providers: [ArticlesService],
+  exports: [ArticlesService],
 })
 export class ArticlesModule {}
