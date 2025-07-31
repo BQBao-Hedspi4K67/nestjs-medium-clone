@@ -389,17 +389,4 @@ export class ArticlesService {
       } as any,
     };
   }
-
-  async getTags(): Promise<{ tags: string[] }> {
-    const articles = await this.prisma.article.findMany({
-      select: {
-        tagList: true,
-      },
-    });
-
-    const allTags = articles.flatMap(article => article.tagList);
-    const uniqueTags = [...new Set(allTags)].sort();
-
-    return { tags: uniqueTags };
-  }
 }

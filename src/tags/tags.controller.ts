@@ -1,12 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
-import { ArticlesService } from '../articles/articles.service';
+import { TagsService } from './tags.service';
+import { TagsResponse } from './interfaces/tags.interface';
 
 @Controller('api/tags')
 export class TagsController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(private readonly tagsService: TagsService) {}
 
   @Get()
-  async getTags(): Promise<{ tags: string[] }> {
-    return this.articlesService.getTags();
+  async getTags(): Promise<TagsResponse> {
+    return this.tagsService.getAllTags();
   }
 }
